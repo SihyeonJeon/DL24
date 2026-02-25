@@ -1,6 +1,6 @@
 # Dockerfile
 # Base image: Official RunPod ComfyUI worker (Pre-configured with ComfyUI + Torch)
-FROM runpod/worker-comfyui:3.1.0-base
+FROM runpod/worker-comfyui:5.7.1-base
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
