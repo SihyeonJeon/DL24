@@ -14,11 +14,11 @@ COMFY_PID=$!
 
 # 2. Wait for ComfyUI to be ready
 echo "[start.sh] Waiting for ComfyUI to allow connections..."
-timeout=60
+timeout=300
 while ! curl -s http://127.0.0.1:8188/ > /dev/null; do
     timeout=$((timeout - 1))
     if [ $timeout -le 0 ]; then
-        echo "[start.sh] ERROR: ComfyUI failed to start within 60 seconds."
+        echo "[start.sh] ERROR: ComfyUI failed to start within 300 seconds."
         exit 1
     fi
     sleep 1
