@@ -33,7 +33,7 @@ RUN git clone https://github.com/rgthree/rgthree-comfy.git && \
     pip install -r requirements.txt
 
 # ── Install Python Dependencies for Handler ────────────────────
-RUN pip install --no-cache-dir requests websocket-client Pillow aiohttp
+RUN pip install --no-cache-dir requests websocket-client Pillow aiohttp runpod
 
 # ── Copy Application Files ─────────────────────────────────────
 COPY extra_model_paths.yaml /comfyui/extra_model_paths.yaml
