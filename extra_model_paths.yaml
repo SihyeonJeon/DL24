@@ -1,9 +1,0 @@
-runpod_network_volume:
-    base_path: /runpod-volume/models/
-    checkpoints: checkpoints/
-    clip: clip/
-    vae: vae/
-    diffusion_models: diffusion_models/
-    loras: loras/
-    latent_upscale_models: latent_upscale_models/
-    text_encoders: text_encoders/
