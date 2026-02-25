@@ -17,6 +17,7 @@ import uuid
 import base64
 import urllib.request
 import urllib.parse
+import urllib.error
 import traceback
 import io
 from pathlib import Path
@@ -95,8 +96,16 @@ def queue_prompt(workflow, client_id):
         data=payload,
         headers={"Content-Type": "application/json"},
     )
-    resp = urllib.request.urlopen(req, timeout=30)
-    return json.loads(resp.read())
+    try:
+        resp = urllib.request.urlopen(req, timeout=30)
+        return json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        log(f"ComfyUI /prompt returned {e.code}: {body}")
+        try:
+            return json.loads(body)
+        except Exception:
+            raise RuntimeError(f"ComfyUI prompt rejected ({e.code}): {body[:500]}")
 
 
 def wait_for_execution(prompt_id, client_id):
