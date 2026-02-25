@@ -8,7 +8,7 @@ ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # ── Install System Dependencies ────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg libsm6 libxext6 \
+    ffmpeg libsm6 libxext6 curl wget \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Install Custom Nodes ───────────────────────────────────────
@@ -43,6 +43,5 @@ COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 # ── Start ──────────────────────────────────────────────────────
-# RunPod worker-comfyui base image usually uses a specific CMD.
-# We override it to use our start script which launches ComfyUI + Handler.
-CMD ["/start.sh"]
+ENTRYPOINT ["/start.sh"]
+CMD []
