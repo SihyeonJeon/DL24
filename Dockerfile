@@ -39,7 +39,6 @@ RUN pip install --no-cache-dir requests websocket-client Pillow aiohttp
 COPY extra_model_paths.yaml /comfyui/extra_model_paths.yaml
 COPY handler.py /handler.py
 COPY start.sh /start.sh
-COPY workflow_reels_v3.json /workflow_reels_v3.json
 
 RUN chmod +x /start.sh
 
