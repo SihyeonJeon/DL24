@@ -19,7 +19,8 @@ RUN cd /comfyui && \
     git config --global pull.rebase false && \
     git fetch --all && \
     git reset --hard origin/master && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir --upgrade -r requirements.txt && \
+    pip install --no-cache-dir ltx-video
 
 # ── Custom Nodes ─────────────────────────────────────────────
 WORKDIR /comfyui/custom_nodes
