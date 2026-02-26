@@ -10,3 +10,4 @@ runpod_network_volume:
     vae: vae/
     loras: loras/
     text_encoders: text_encoders/
+    vfi_models: vfi_models/
