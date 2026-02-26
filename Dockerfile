@@ -30,9 +30,11 @@ RUN git clone https://github.com/rgthree/rgthree-comfy.git && \
     pip install --no-cache-dir -r requirements.txt 2>/dev/null || true
 
 # LTX-2 needs: ComfyUI-LTXVideo
-RUN git clone https://github.com/Lightricks/ComfyUI-LTXVideo.git && \
+RUN cd /comfyui/custom_nodes && \
+    rm -rf ComfyUI-LTXVideo && \
+    git clone https://github.com/Lightricks/ComfyUI-LTXVideo.git && \
     cd ComfyUI-LTXVideo && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install -r requirements.txt --break-system-packages 2>/dev/null || true
 
 # LTX-2 needs: VideoHelperSuite (VHS_VideoCombine)
 RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git && \
