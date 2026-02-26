@@ -1,0 +1,12 @@
+runpod_network_volume:
+    base_path: /runpod-volume/models/
+    # Z-Image (image generation)
+    checkpoints: checkpoints/
+    unet: diffusion_models/
+    diffusion_models: diffusion_models/
+    # WAN I2V
+    clip: clip/
+    clip_vision: clip_vision/
+    vae: vae/
+    loras: loras/
+    text_encoders: text_encoders/
