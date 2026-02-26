@@ -86,6 +86,12 @@ RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/wallen0322/ComfyUI-Wan22FMLF.git && \
     (cd ComfyUI-Wan22FMLF && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true)
 
+# [8] ComfyUI-Frame-Interpolation — RIFE VFI (프레임 뻥튀기 보간 노드)
+RUN cd ${COMFY_DIR}/custom_nodes && \
+    git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git && \
+    cd ComfyUI-Frame-Interpolation && \
+    python3 install.py
+    
 # ── Config files ──────────────────────────────────────────────
 COPY extra_model_paths.yaml ${COMFY_DIR}/extra_model_paths.yaml
 COPY handler.py /handler.py
