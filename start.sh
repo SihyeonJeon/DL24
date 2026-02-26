@@ -24,6 +24,20 @@ else
     echo "[startup] WARNING: No network volume at /runpod-volume"
 fi
 
+
+# start.sh에 추가 (ComfyUI 실행 전)
+echo "[startup] Checking LTXV nodes..."
+python3 -c "
+import sys
+sys.path.insert(0, '/comfyui')
+try:
+    from comfy_extras import nodes_ltxv
+    print('[startup] nodes_ltxv loaded OK')
+    print([x for x in dir(nodes_ltxv) if 'Upscale' in x])
+except Exception as e:
+    print(f'[startup] nodes_ltxv FAILED: {e}')
+"
+
 echo "=============================================="
 echo " Starting handler..."
 echo "=============================================="
