@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Update ComfyUI to Latest (Official Upstream 강제 지정) ──
+ARG CACHEBUST=1 
+
 RUN cd /comfyui && \
     git remote set-url origin https://github.com/comfyanonymous/ComfyUI.git && \
     git fetch --all && \
