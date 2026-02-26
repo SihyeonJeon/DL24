@@ -83,6 +83,7 @@ REQUIRED_NODES=(
     "ComfyUI-KJNodes"
     "ComfyUI-VideoHelperSuite"
     "ComfyUI-Wan22FMLF"
+    "ComfyUI-Frame-Interpolation"
 )
 for node in "${REQUIRED_NODES[@]}"; do
     if [ -d "/comfyui/custom_nodes/$node" ]; then
