@@ -126,12 +126,12 @@ except Exception as e:
 # ── RIFE 모델 심볼릭 링크 ─────────────────────────────────────
 echo "[startup] ── RIFE VFI model symlink ──────────────────────"
 RIFE_SRC="/runpod-volume/models/vfi_models/rife49.pth"
-# 수정: 노드가 실제로 참조하는 ckpts/rife 하위 경로로 변경
-RIFE_DST="/comfyui/custom_nodes/ComfyUI-Frame-Interpolation/ckpts/rife/rife49.pth"
+# 수정: ComfyUI가 최우선으로 인식하는 기본 디렉토리(인덱스 0)로 지정
+RIFE_DST="/comfyui/models/vfi_models/rife49.pth"
 
 mkdir -p "$(dirname "$RIFE_DST")"
 
-# 수정: 네트워크 볼륨 마운트 지연을 대비한 대기 로직 (최대 10초)
+# 수정: 네트워크 볼륨 마운트 지연 대기 로직 유지
 for i in {1..10}; do
     if [ -f "$RIFE_SRC" ]; then
         break
@@ -141,9 +141,9 @@ done
 
 if [ -f "$RIFE_SRC" ]; then
     ln -sf "$RIFE_SRC" "$RIFE_DST"
-    echo "[startup] ✓ rife49.pth symlinked from network volume"
+    echo "[startup] ✓ rife49.pth symlinked from network volume to $RIFE_DST"
 elif [ -f "$RIFE_DST" ]; then
-    echo "[startup] ✓ rife49.pth already exists in node dir"
+    echo "[startup] ✓ rife49.pth already exists at $RIFE_DST"
 else
     echo "[startup] ✗ WARNING: rife49.pth not found anywhere!"
 fi
