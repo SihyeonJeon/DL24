@@ -8,7 +8,6 @@ FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
-ENV PIP_BREAK_SYSTEM_PACKAGES=1
 ENV COMFY_DIR=/comfyui
 
 # ── System dependencies ───────────────────────────────────────
@@ -27,7 +26,7 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
     curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12
 
 # ── PyTorch with CUDA 12.4 ──────────────────────────────────
-RUN pip3 install --no-cache-dir \
+RUN pip3 install --no-cache-dir --break-system-packages torch \
     torch torchvision torchaudio \
     --index-url https://download.pytorch.org/whl/cu124
 
@@ -36,10 +35,10 @@ RUN git clone https://github.com/Comfy-Org/ComfyUI.git ${COMFY_DIR}
 WORKDIR ${COMFY_DIR}
 
 # ── ComfyUI core dependencies ─────────────────────────────────
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir --break-system-packages torch -r requirements.txt
 
 # ── RunPod + handler dependencies ─────────────────────────────
-RUN pip3 install --no-cache-dir \
+RUN pip3 install --no-cache-dir --break-system-packages torch \
     runpod \
     websocket-client \
     requests \
