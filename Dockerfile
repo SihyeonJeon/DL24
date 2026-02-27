@@ -4,7 +4,7 @@
 # GPU Target: A100 80GB
 # =============================================================
 
-FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
+FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
@@ -13,13 +13,10 @@ ENV COMFY_DIR=/comfyui
 
 # ── System dependencies ───────────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    software-properties-common \
-    && add-apt-repository ppa:deadsnakes/ppa -y \
-    && apt-get update && apt-get install -y --no-install-recommends \
-    python3.12 python3.12-venv python3.12-dev \
     git wget curl ffmpeg \
     libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
+
 
 # ── Python 3.12 as default ────────────────────────────────────
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 && \
