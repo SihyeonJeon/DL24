@@ -53,7 +53,7 @@ EXECUTION_TIMEOUT = int(os.environ.get("EXECUTION_TIMEOUT", 2400))  # 40min
 
 # Instagram 4:5 portrait
 INSTAGRAM_W = 1080
-INSTAGRAM_H = 1350
+INSTAGRAM_H = 1920
 
 comfy_process = None
 
