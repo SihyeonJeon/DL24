@@ -79,10 +79,10 @@ RUN cd ${COMFY_DIR}/custom_nodes && \
     (cd ComfyUI-Frame-Interpolation && python3 install.py || true)
 
 # ── vfi_utils.py URL 패치: 죽은 GitHub URL → 작동하는 HuggingFace URL ──
+# ── vfi_utils.py URL 패치 ─────────────────────────────────────
 RUN sed -i \
-    's|BASE_MODEL_DOWNLOAD_URLS = \[.*\]|BASE_MODEL_DOWNLOAD_URLS = ["https://huggingface.co/hfmaster/models-moved/resolve/cab6dcee2fbb05e190dbb8f536fbdaa489031a14/rife/"]|' \
+    's|BASE_MODEL_DOWNLOAD_URLS = \[.*\]|BASE_MODEL_DOWNLOAD_URLS = ["https://huggingface.co/Isi99999/Frame_Interpolation_Models/resolve/main/"]|' \
     ${COMFY_DIR}/custom_nodes/ComfyUI-Frame-Interpolation/vfi_utils.py && \
-    echo "vfi_utils.py URL patched:" && \
     grep "BASE_MODEL_DOWNLOAD_URLS" ${COMFY_DIR}/custom_nodes/ComfyUI-Frame-Interpolation/vfi_utils.py
 
 # ── Config files ──────────────────────────────────────────────
