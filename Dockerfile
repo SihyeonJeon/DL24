@@ -88,8 +88,8 @@ RUN cd ${COMFY_DIR}/custom_nodes && \
     
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git && \
-    (cd ComfyUI-Frame-Interpolation && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true) && \
-    (cd ComfyUI-Frame-Interpolation && python3 install.py || true)
+    cd ComfyUI-Frame-Interpolation && \
+    python3 install.py
     
 # ── Config files ──────────────────────────────────────────────
 COPY extra_model_paths.yaml ${COMFY_DIR}/extra_model_paths.yaml
