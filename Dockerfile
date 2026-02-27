@@ -86,12 +86,10 @@ RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/wallen0322/ComfyUI-Wan22FMLF.git && \
     (cd ComfyUI-Wan22FMLF && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true)
     
-# [8] ComfyUI-Frame-Interpolation — RIFE VFI (보간)
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git && \
-    cd ComfyUI-Frame-Interpolation && \
-    pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true && \
-    python3 install.py || true
+    (cd ComfyUI-Frame-Interpolation && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true) && \
+    (cd ComfyUI-Frame-Interpolation && python3 install.py || true)
     
 # ── Config files ──────────────────────────────────────────────
 COPY extra_model_paths.yaml ${COMFY_DIR}/extra_model_paths.yaml
