@@ -126,26 +126,21 @@ except Exception as e:
 # ── RIFE 모델 심볼릭 링크 ─────────────────────────────────────
 echo "[startup] ── RIFE VFI model symlink ──────────────────────"
 RIFE_SRC="/runpod-volume/models/vfi_models/rife49.pth"
-# 수정: ComfyUI가 최우선으로 인식하는 기본 디렉토리(인덱스 0)로 지정
-RIFE_DST="/comfyui/models/vfi_models/rife49.pth"
 
-mkdir -p "$(dirname "$RIFE_DST")"
+# 플러그인이 실제로 탐색하는 경로 (대소문자 모두 커버)
+RIFE_DST1="/comfyui/custom_nodes/ComfyUI-Frame-Interpolation/vfi_models/rife/rife49.pth"
+RIFE_DST2="/comfyui/custom_nodes/ComfyUI-Frame-Interpolation/vfi_models/RIFE/rife49.pth"
 
-# 수정: 네트워크 볼륨 마운트 지연 대기 로직 유지
-for i in {1..10}; do
-    if [ -f "$RIFE_SRC" ]; then
-        break
-    fi
-    sleep 1
-done
+mkdir -p "$(dirname "$RIFE_DST1")"
+mkdir -p "$(dirname "$RIFE_DST2")"
 
 if [ -f "$RIFE_SRC" ]; then
-    ln -sf "$RIFE_SRC" "$RIFE_DST"
-    echo "[startup] ✓ rife49.pth symlinked from network volume to $RIFE_DST"
-elif [ -f "$RIFE_DST" ]; then
-    echo "[startup] ✓ rife49.pth already exists at $RIFE_DST"
+    ln -sf "$RIFE_SRC" "$RIFE_DST1"
+    ln -sf "$RIFE_SRC" "$RIFE_DST2"
+    echo "[startup] ✓ rife49.pth → $RIFE_DST1"
+    echo "[startup] ✓ rife49.pth → $RIFE_DST2"
 else
-    echo "[startup] ✗ WARNING: rife49.pth not found anywhere!"
+    echo "[startup] ✗ WARNING: $RIFE_SRC not found!"
 fi
 
 echo ""
