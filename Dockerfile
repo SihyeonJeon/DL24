@@ -73,12 +73,50 @@ RUN cd ${COMFY_DIR}/custom_nodes && \
     (cd ComfyUI-Wan22FMLF && python3 -m pip install --no-cache-dir -r requirements.txt 2>/dev/null || true)
 
 # [8] ComfyUI-Frame-Interpolation
-# install.py는 cupy-cuda12x 등 CUDA 가속 패키지를 빌드 타임에 설치하는 역할 — 반드시 실행
-# 모델(rife49.pth 등)은 extra_model_paths.yaml의 vfi_models 경로로 네트워크 볼륨에서 로드
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git && \
     (cd ComfyUI-Frame-Interpolation && python3 -m pip install --no-cache-dir -r requirements.txt 2>/dev/null || true) && \
     (cd ComfyUI-Frame-Interpolation && python3 install.py || true)
+
+# ── vfi_utils.py 패치: get_ckpt_container_path가 네트워크 볼륨을 먼저 탐색 ──
+RUN python3 - << 'EOF'
+import re, os
+
+filepath = '/comfyui/custom_nodes/ComfyUI-Frame-Interpolation/vfi_utils.py'
+with open(filepath) as f:
+    src = f.read()
+
+# 기존 함수를 찾아서 네트워크 볼륨 우선 탐색 로직으로 교체
+old_pattern = r'def get_ckpt_container_path\(model_type\):[^\n]*\n\s+return[^\n]+'
+new_func = '''def get_ckpt_container_path(model_type):
+    import os as _os
+    # RunPod 네트워크 볼륨 우선 탐색 (대소문자 모두 시도)
+    nv_base = "/runpod-volume/models/vfi_models"
+    for mt in [model_type, model_type.lower(), model_type.upper()]:
+        candidate = _os.path.join(nv_base, mt)
+        if _os.path.isdir(candidate):
+            return candidate
+    # flat 디렉토리에 파일이 바로 있는 경우
+    if _os.path.isdir(nv_base):
+        return nv_base
+    # 원래 동작: 플러그인 내부 경로
+    return _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "vfi_models", model_type)'''
+
+patched = re.sub(old_pattern, new_func, src)
+if patched == src:
+    print("WARNING: pattern not found, appending override at top")
+    # fallback: 함수 정의 전체를 파일 앞에 삽입
+    src = src.replace(
+        'def get_ckpt_container_path(model_type):',
+        '# PATCHED\n' + new_func + '\nif False:\n    def get_ckpt_container_path(model_type):'
+    )
+    with open(filepath, 'w') as f:
+        f.write(src)
+else:
+    with open(filepath, 'w') as f:
+        f.write(patched)
+    print("vfi_utils.py patched OK")
+EOF
 
 # ── Config files ──────────────────────────────────────────────
 COPY extra_model_paths.yaml ${COMFY_DIR}/extra_model_paths.yaml
