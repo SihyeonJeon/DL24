@@ -2,46 +2,36 @@
 # RunPod Serverless Worker
 # Pipeline: Z-Image generation → WAN 2.2 I2V (LightX2V 4-step)
 # GPU Target: A100 80GB
+# Base: runpod/pytorch 2.4.0 + Python 3.11 + CUDA 12.4.1
 # =============================================================
 
 FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
-ENV PIP_BREAK_SYSTEM_PACKAGES=1
 ENV COMFY_DIR=/comfyui
 
 # ── System dependencies ───────────────────────────────────────
+# (python3/pip already provided by base image — no reinstall needed)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git wget curl ffmpeg \
     libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
-
-
-# ── Python 3.12 as default ────────────────────────────────────
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 && \
-    curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12
-
-# ── PyTorch with CUDA 12.4 ──────────────────────────────────
-RUN pip3 install --no-cache-dir \
-    torch torchvision torchaudio \
-    --index-url https://download.pytorch.org/whl/cu124
 
 # ── Clone latest ComfyUI ──────────────────────────────────────
 RUN git clone https://github.com/Comfy-Org/ComfyUI.git ${COMFY_DIR}
 WORKDIR ${COMFY_DIR}
 
 # ── ComfyUI core dependencies ─────────────────────────────────
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 # ── RunPod + handler dependencies ─────────────────────────────
-RUN pip3 install --no-cache-dir \
+RUN python3 -m pip install --no-cache-dir \
     runpod \
     websocket-client \
     requests \
     Pillow \
-    imageio[ffmpeg] \
+    "imageio[ffmpeg]" \
     av \
     typing_extensions
 
@@ -52,42 +42,44 @@ RUN pip3 install --no-cache-dir \
 # [1] rgthree — SetNode/GetNode, Fast Groups Bypasser
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/rgthree/rgthree-comfy.git && \
-    (cd rgthree-comfy && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true)
+    (cd rgthree-comfy && python3 -m pip install --no-cache-dir -r requirements.txt 2>/dev/null || true)
 
-# [2] ComfyUI-Custom-Scripts (pysssss) — ShowText, Set/Get wire nodes
+# [2] ComfyUI-Custom-Scripts (pysssss)
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git
 
-# [3] ComfyUI-Easy-Use — easy int / easy utility nodes
+# [3] ComfyUI-Easy-Use
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/yolain/ComfyUI-Easy-Use.git && \
-    (cd ComfyUI-Easy-Use && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true)
+    (cd ComfyUI-Easy-Use && python3 -m pip install --no-cache-dir -r requirements.txt 2>/dev/null || true)
 
-# [4] ComfyUI_Comfyroll_CustomNodes — CR Text Concatenate / CR Prompt Text
+# [4] ComfyUI_Comfyroll_CustomNodes
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git
 
-# [5] ComfyUI-KJNodes — ImageBatchExtendWithOverlap, SomethingToString
+# [5] ComfyUI-KJNodes
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/kijai/ComfyUI-KJNodes.git && \
-    (cd ComfyUI-KJNodes && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true)
+    (cd ComfyUI-KJNodes && python3 -m pip install --no-cache-dir -r requirements.txt 2>/dev/null || true)
 
-# [6] ComfyUI-VideoHelperSuite (VHS) — VHS_VideoCombine, video encode/save
+# [6] ComfyUI-VideoHelperSuite (VHS)
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git && \
-    (cd ComfyUI-VideoHelperSuite && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true)
+    (cd ComfyUI-VideoHelperSuite && python3 -m pip install --no-cache-dir -r requirements.txt 2>/dev/null || true)
 
-# [7] ComfyUI-Wan22FMLF — WanAdvancedI2V (SVI mode 포함, I2V 핵심 노드)
-#     Uses comfy_api.latest — requires ComfyUI >= 0.3.x (latest clone OK)
+# [7] ComfyUI-Wan22FMLF — WanAdvancedI2V
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/wallen0322/ComfyUI-Wan22FMLF.git && \
-    (cd ComfyUI-Wan22FMLF && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true)
-    
+    (cd ComfyUI-Wan22FMLF && python3 -m pip install --no-cache-dir -r requirements.txt 2>/dev/null || true)
+
+# [8] ComfyUI-Frame-Interpolation
+# install.py는 cupy-cuda12x 등 CUDA 가속 패키지를 빌드 타임에 설치하는 역할 — 반드시 실행
+# 모델(rife49.pth 등)은 extra_model_paths.yaml의 vfi_models 경로로 네트워크 볼륨에서 로드
 RUN cd ${COMFY_DIR}/custom_nodes && \
     git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git && \
-    (cd ComfyUI-Frame-Interpolation && pip3 install --no-cache-dir -r requirements.txt 2>/dev/null || true) && \
+    (cd ComfyUI-Frame-Interpolation && python3 -m pip install --no-cache-dir -r requirements.txt 2>/dev/null || true) && \
     (cd ComfyUI-Frame-Interpolation && python3 install.py || true)
-    
+
 # ── Config files ──────────────────────────────────────────────
 COPY extra_model_paths.yaml ${COMFY_DIR}/extra_model_paths.yaml
 COPY handler.py /handler.py
@@ -96,6 +88,7 @@ RUN chmod +x /start.sh
 
 # ── Verify ────────────────────────────────────────────────────
 RUN python3 -c "import torch; print(f'PyTorch {torch.__version__} | CUDA {torch.version.cuda}')"
+RUN python3 -c "import runpod; print(f'runpod {runpod.__version__}')"
 RUN python3 -c "import imageio; print(f'imageio {imageio.__version__}')"
 
 WORKDIR /
