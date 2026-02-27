@@ -126,9 +126,18 @@ except Exception as e:
 # ── RIFE 모델 심볼릭 링크 ─────────────────────────────────────
 echo "[startup] ── RIFE VFI model symlink ──────────────────────"
 RIFE_SRC="/runpod-volume/models/vfi_models/rife49.pth"
-RIFE_DST="/comfyui/custom_nodes/ComfyUI-Frame-Interpolation/vfi_models/rife49.pth"
+# 수정: 노드가 실제로 참조하는 ckpts/rife 하위 경로로 변경
+RIFE_DST="/comfyui/custom_nodes/ComfyUI-Frame-Interpolation/ckpts/rife/rife49.pth"
 
-mkdir -p "$(dirname $RIFE_DST)"
+mkdir -p "$(dirname "$RIFE_DST")"
+
+# 수정: 네트워크 볼륨 마운트 지연을 대비한 대기 로직 (최대 10초)
+for i in {1..10}; do
+    if [ -f "$RIFE_SRC" ]; then
+        break
+    fi
+    sleep 1
+done
 
 if [ -f "$RIFE_SRC" ]; then
     ln -sf "$RIFE_SRC" "$RIFE_DST"
