@@ -26,7 +26,7 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1
     update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 && \
     curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12
 
-# ── PyTorch with CUDA 12.4 ────────────────────────────────────
+# ── PyTorch with CUDA 12.4 ──────────────────────────────────
 RUN pip3 install --no-cache-dir \
     torch torchvision torchaudio \
     --index-url https://download.pytorch.org/whl/cu124
