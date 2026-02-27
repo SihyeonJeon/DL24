@@ -125,7 +125,7 @@ except Exception as e:
 
 # ── RIFE 모델 심볼릭 링크 ─────────────────────────────────────
 echo "[startup] ── RIFE VFI model symlink ──────────────────────"
-RIFE_SRC="/runpod-volume/models/vfi_models/rife/rife49.pth"
+RIFE_SRC="/runpod-volume/models/vfi_models/rife49.pth"
 RIFE_DST="/comfyui/custom_nodes/ComfyUI-Frame-Interpolation/vfi_models/rife49.pth"
 
 mkdir -p "$(dirname $RIFE_DST)"
