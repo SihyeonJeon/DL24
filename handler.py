@@ -63,40 +63,37 @@ def log(msg: str):
 
 
 # ── ComfyUI lifecycle ─────────────────────────────────────────
-def upload_image_to_comfyui(name: str, url_or_b64: str) -> str:
-    """
-    URL 또는 base64 문자열을 받아 ComfyUI /upload/image에 업로드.
-    반환값: ComfyUI가 인식하는 파일명 (e.g. "input_image.png")
-    """
-    import io, urllib.request
-    from urllib.parse import urlparse
+def upload_image_to_comfyui(name: str, url: str) -> str:
+    import io
+    from PIL import Image
 
-    # URL이면 다운로드, base64이면 디코딩
-    if url_or_b64.startswith("http://") or url_or_b64.startswith("https://"):
-        log(f"Downloading image: {url_or_b64[:80]}...")
-        img_bytes = urllib.request.urlopen(url_or_b64, timeout=30).read()
-    else:
-        img_bytes = base64.b64decode(url_or_b64)
+    log(f"Downloading image: {url[:80]}")
+    img_bytes = urllib.request.urlopen(url, timeout=30).read()
 
-    # multipart/form-data로 업로드
-    boundary = "----ComfyUploadBoundary"
+    # ── 실제 포맷 감지 후 PNG로 정규화 ──────────────────────
+    # ComfyUI LoadImage는 PNG를 가장 안정적으로 처리함
+    img = Image.open(io.BytesIO(img_bytes))
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    img_bytes = buf.getvalue()
+    upload_name = name.rsplit(".", 1)[0] + ".png"  # 확장자 통일
+
+    boundary = "----ComfyBoundary"
     body = (
         f"--{boundary}\r\n"
-        f'Content-Disposition: form-data; name="image"; filename="{name}"\r\n'
+        f'Content-Disposition: form-data; name="image"; filename="{upload_name}"\r\n'
         f"Content-Type: image/png\r\n\r\n"
     ).encode() + img_bytes + f"\r\n--{boundary}--\r\n".encode()
 
     req = urllib.request.Request(
-        f"{COMFY_URL}/upload/image",
-        data=body,
+        f"{COMFY_URL}/upload/image", data=body,
         headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
         method="POST",
     )
     resp = json.loads(urllib.request.urlopen(req, timeout=30).read())
-    uploaded_name = resp.get("name", name)
-    log(f"Uploaded image → {uploaded_name}")
+    uploaded_name = resp.get("name", upload_name)
+    log(f"Uploaded → {uploaded_name}")
     return uploaded_name
-
 
 
 def start_comfyui():
@@ -277,12 +274,15 @@ def handler(event: dict) -> dict:
         if not workflow:
             return {"error": "No 'workflow' key in input"}
 
-        # ── 이미지 업로드 처리 ──────────────────────────
+        # handler() 내부 — workflow 큐잉 전
         for img_entry in job_input.get("images", []):
-            name        = img_entry.get("name", "input_image.png")
-            url_or_b64  = img_entry.get("image", "")
-            if url_or_b64:
-                upload_image_to_comfyui(name, url_or_b64)
+            name       = img_entry.get("name", "input_image.png")
+            url        = img_entry.get("image", "")
+            if url:
+                actual_name = upload_image_to_comfyui(name, url)
+                # workflow의 LoadImage 노드(node "10")에 실제 파일명 반영
+                if "10" in workflow and workflow["10"].get("class_type") == "LoadImage":
+                    workflow["10"]["inputs"]["image"] = actual_name
         # ────────────────────────────────────────────────
 
         client_id = str(uuid.uuid4())
