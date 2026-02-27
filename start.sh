@@ -122,6 +122,23 @@ except Exception as e:
     print(f'[startup] WanAdvancedI2V import ERROR: {e}')
 " 2>&1
 
+
+# ── RIFE 모델 심볼릭 링크 ─────────────────────────────────────
+echo "[startup] ── RIFE VFI model symlink ──────────────────────"
+RIFE_SRC="/runpod-volume/models/vfi_models/rife/rife49.pth"
+RIFE_DST="/comfyui/custom_nodes/ComfyUI-Frame-Interpolation/vfi_models/rife/rife49.pth"
+
+mkdir -p "$(dirname $RIFE_DST)"
+
+if [ -f "$RIFE_SRC" ]; then
+    ln -sf "$RIFE_SRC" "$RIFE_DST"
+    echo "[startup] ✓ rife49.pth symlinked from network volume"
+elif [ -f "$RIFE_DST" ]; then
+    echo "[startup] ✓ rife49.pth already exists in node dir"
+else
+    echo "[startup] ✗ WARNING: rife49.pth not found anywhere!"
+fi
+
 echo ""
 echo "=============================================="
 echo " Starting handler.py ..."
