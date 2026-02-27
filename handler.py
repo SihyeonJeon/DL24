@@ -322,20 +322,6 @@ if __name__ == "__main__":
     log("RunPod Worker — Z-Image + WAN 2.2 I2V LightX2V")
     log("=" * 60)
 
-    # rife49.pth 강제 심볼릭 링크 생성 로직 추가
-    vfi_source_path = "/runpod-volume/models/vfi_models/rife49.pth"
-    vfi_target_dir = os.path.join(COMFY_DIR, "models", "vfi_models")
-    vfi_target_path = os.path.join(vfi_target_dir, "rife49.pth")
-
-    if os.path.exists(vfi_source_path):
-        os.makedirs(vfi_target_dir, exist_ok=True)
-        if not os.path.exists(vfi_target_path):
-            try:
-                os.symlink(vfi_source_path, vfi_target_path)
-                log(f"Symlink created for rife49.pth -> {vfi_target_path}")
-            except Exception as e:
-                log(f"Failed to create symlink for rife49.pth: {e}")
-
     start_comfyui()
     if not wait_for_comfyui():
         log("FATAL: ComfyUI failed to start")
