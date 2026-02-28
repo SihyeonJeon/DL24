@@ -78,7 +78,6 @@ RUN cd ${COMFY_DIR}/custom_nodes && \
     (cd ComfyUI-Frame-Interpolation && python3 -m pip install --no-cache-dir -r requirements.txt 2>/dev/null || true) && \
     (cd ComfyUI-Frame-Interpolation && python3 install.py || true)
 
-# ── vfi_utils.py URL 패치: 죽은 GitHub URL → 작동하는 HuggingFace URL ──
 # ── vfi_utils.py URL 패치 ─────────────────────────────────────
 RUN sed -i \
     's|BASE_MODEL_DOWNLOAD_URLS = \[.*\]|BASE_MODEL_DOWNLOAD_URLS = ["https://huggingface.co/Isi99999/Frame_Interpolation_Models/resolve/main/"]|' \
@@ -90,6 +89,26 @@ COPY extra_model_paths.yaml ${COMFY_DIR}/extra_model_paths.yaml
 COPY handler.py /handler.py
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
+
+# ── Bake Models into Docker Image ─────────────────────────────
+# 1. 모델 디렉토리 생성
+RUN mkdir -p ${COMFY_DIR}/models/diffusion_models \
+             ${COMFY_DIR}/models/vae \
+             ${COMFY_DIR}/models/clip_vision \
+             ${COMFY_DIR}/models/text_encoders
+
+# 2. WAN 2.2 모델 다운로드 (Civitai API Key 포함)
+RUN wget -q -O ${COMFY_DIR}/models/diffusion_models/wan22_i2vHighV21.safetensors "https://civitai.com/api/download/models/2567410?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c" && \
+    wget -q -O ${COMFY_DIR}/models/diffusion_models/wan22_i2vLowV21.safetensors "https://civitai.com/api/download/models/2567309?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c"
+
+# 3. VAE 다운로드
+RUN wget -q -O ${COMFY_DIR}/models/vae/Wan2.1_VAE.pth "https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B/resolve/main/Wan2.1_VAE.pth"
+
+# 4. CLIP Vision 다운로드
+RUN wget -q -O ${COMFY_DIR}/models/clip_vision/clip_vision_h.safetensors "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors"
+
+# 5. Text Encoder 다운로드
+RUN wget -q -O ${COMFY_DIR}/models/text_encoders/umt5_xxl_fp16.safetensors "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp16.safetensors"
 
 # ── Verify ────────────────────────────────────────────────────
 RUN python3 -c "import torch; print(f'PyTorch {torch.__version__} | CUDA {torch.version.cuda}')"
