@@ -44,24 +44,30 @@ check_model() {
     fi
 }
 
+# ... 기존 코드 ...
 BASE="/runpod-volume/models"
+BAKED_BASE="/comfyui/models" # 구워진 모델들의 기준 경로 추가
 
 echo ""
-echo "  [Z-Image — image generation]"
+echo "  [Z-Image — image generation (from Volume)]"
 check_model "UNET"    "$BASE/diffusion_models/z_image/ARAZmixZIT019_bf16.safetensors"
 check_model "CLIP"    "$BASE/clip/qwen_3_4b_fp8_mixed.safetensors"
 check_model "VAE"     "$BASE/vae/ae.safetensors"
 check_model "LoRA"    "$BASE/loras/skin_texture_zit.safetensors"
 
 echo ""
-echo "  [WAN 2.2 I2V — video generation]"
-check_model "High Noise" "$BASE/diffusion_models/wan22_i2vHighV21.safetensors"
-check_model "Low Noise"  "$BASE/diffusion_models/wan22_i2vLowV21.safetensors"
-check_model "LoRA High"  "$BASE/loras/Wan_2_2_I2V_A14B_HIGH_lightx2v_4step_lora_v1030_rank_64_bf16.safetensors"
-check_model "LoRA Low"   "$BASE/loras/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors"
-check_model "T5 encoder" "$BASE/text_encoders/umt5_xxl_fp16.safetensors"
-check_model "CLIP Vision" "$BASE/clip_vision/clip_vision_h.safetensors"
-check_model "VAE"        "$BASE/vae/Wan2.1_VAE.pth"
+echo "  [WAN 2.2 I2V — video generation (from Docker & Volume)]"
+# 도커에 구워진 모델들 경로 변경
+check_model "High Noise"  "$BAKED_BASE/diffusion_models/wan22_i2vHighV21.safetensors"
+check_model "Low Noise"   "$BAKED_BASE/diffusion_models/wan22_i2vLowV21.safetensors"
+check_model "T5 encoder"  "$BAKED_BASE/text_encoders/umt5_xxl_fp16.safetensors"
+check_model "CLIP Vision" "$BAKED_BASE/clip_vision/clip_vision_h.safetensors"
+check_model "VAE"         "$BAKED_BASE/vae/Wan2.1_VAE.pth"
+
+# LoRA 모델들은 여전히 볼륨에 있다고 가정
+check_model "LoRA High"   "$BASE/loras/Wan_2_2_I2V_A14B_HIGH_lightx2v_4step_lora_v1030_rank_64_bf16.safetensors"
+check_model "LoRA Low"    "$BASE/loras/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors"
+
 
 # ── extra_model_paths.yaml 확인 ───────────────────────────────
 echo ""
