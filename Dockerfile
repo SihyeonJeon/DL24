@@ -91,25 +91,25 @@ COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 # ── Bake Models into Docker Image ─────────────────────────────
-# 1. 모델 디렉토리 생성
+# 1. 모델 디렉토리 일괄 생성
 RUN mkdir -p ${COMFY_DIR}/models/diffusion_models \
              ${COMFY_DIR}/models/vae \
              ${COMFY_DIR}/models/clip_vision \
-             ${COMFY_DIR}/models/text_encoders
+             ${COMFY_DIR}/models/text_encoders \
+             ${COMFY_DIR}/models/loras
 
-# 2. WAN 2.2 모델 다운로드 (Civitai API Key 포함)
-RUN wget -q -O ${COMFY_DIR}/models/diffusion_models/wan22_i2vLowV21.safetensors "https://civitai.com/api/download/models/2567410?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c" && \
-    wget -q -O ${COMFY_DIR}/models/diffusion_models/wan22_i2vHighV21.safetensors "https://civitai.com/api/download/models/2567309?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c"
+# 2. WAN 2.2 베이스 모델 (Civitai API)
+RUN curl -L -o ${COMFY_DIR}/models/diffusion_models/wan22_i2vHighV21.safetensors "https://civitai.com/api/download/models/2567410?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c" && \
+    curl -L -o ${COMFY_DIR}/models/diffusion_models/wan22_i2vLowV21.safetensors "https://civitai.com/api/download/models/2567309?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c"
 
-# 3. VAE 다운로드
-RUN wget -q -O ${COMFY_DIR}/models/vae/Wan2.1_VAE.pth "https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B/resolve/main/Wan2.1_VAE.pth"
+# 3. VAE & Text Encoder & CLIP Vision (Hugging Face - User Agent 우회)
+RUN curl -L -A "Mozilla/5.0" -o ${COMFY_DIR}/models/vae/Wan2.1_VAE.pth "https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B/resolve/main/Wan2.1_VAE.pth" && \
+    curl -L -A "Mozilla/5.0" -o ${COMFY_DIR}/models/text_encoders/umt5_xxl_fp16.safetensors "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp16.safetensors" && \
+    curl -L -A "Mozilla/5.0" -o ${COMFY_DIR}/models/clip_vision/clip_vision_h.safetensors "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors"
 
-# 4. CLIP Vision 다운로드
-RUN wget -q -O ${COMFY_DIR}/models/clip_vision/clip_vision_h.safetensors "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors"
-
-# 5. Text Encoder 다운로드
-RUN wget -q -O ${COMFY_DIR}/models/text_encoders/umt5_xxl_fp16.safetensors "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp16.safetensors"
-
+# 4. LoRA 4-step 모델 (Hugging Face - resolve 경로 사용)
+RUN curl -L -A "Mozilla/5.0" -o ${COMFY_DIR}/models/loras/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22-Lightning/old/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors" && \
+    curl -L -A "Mozilla/5.0" -o ${COMFY_DIR}/models/loras/Wan_2_2_I2V_A14B_HIGH_lightx2v_4step_lora_v1030_rank_64_bf16.safetensors "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22_Lightx2v/Wan_2_2_I2V_A14B_HIGH_lightx2v_4step_lora_v1030_rank_64_bf16.safetensors"
 # ── Verify ────────────────────────────────────────────────────
 RUN python3 -c "import torch; print(f'PyTorch {torch.__version__} | CUDA {torch.version.cuda}')"
 RUN python3 -c "import runpod; print(f'runpod {runpod.__version__}')"
