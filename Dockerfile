@@ -98,8 +98,8 @@ RUN mkdir -p ${COMFY_DIR}/models/diffusion_models \
              ${COMFY_DIR}/models/text_encoders
 
 # 2. WAN 2.2 모델 다운로드 (Civitai API Key 포함)
-RUN wget -q -O ${COMFY_DIR}/models/diffusion_models/wan22_i2vHighV21.safetensors "https://civitai.com/api/download/models/2567410?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c" && \
-    wget -q -O ${COMFY_DIR}/models/diffusion_models/wan22_i2vLowV21.safetensors "https://civitai.com/api/download/models/2567309?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c"
+RUN wget -q -O ${COMFY_DIR}/models/diffusion_models/wan22_i2vLowV21.safetensors "https://civitai.com/api/download/models/2567410?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c" && \
+    wget -q -O ${COMFY_DIR}/models/diffusion_models/wan22_i2vHighV21.safetensors "https://civitai.com/api/download/models/2567309?type=Model&format=SafeTensor&size=pruned&fp=fp8&token=e5e3f0cd37b9bd27cdac2a5bd76d9c1c"
 
 # 3. VAE 다운로드
 RUN wget -q -O ${COMFY_DIR}/models/vae/Wan2.1_VAE.pth "https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B/resolve/main/Wan2.1_VAE.pth"
